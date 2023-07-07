@@ -1,0 +1,138 @@
+﻿
+@{
+    ViewBag.Title = "Product";
+    Layout = "~/Areas/Admin/Views/Shared/AdminLayout.cshtml";
+}
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/bootstrap")
+<script>
+
+    $(document).ready(function () {
+        FetchProduct();
+        $("#btnsubmit").click(function () {
+            AddProduct();
+        })
+        $("#btnupdate").click(function () {
+            UpdateProduct();
+        })
+    })
+
+    function FetchProduct() {
+        $.ajax({
+            url: '/Admin/Product/GetProduct',
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $("#tbldata").empty();
+                $.each(resp, function (i, d) {
+                    $("#tbldata").append("<tr><td>" + (i + 1) + "</td><td>" + d.product_name + "</td><td>" + d.rate + "</td><td>" + d.tax + "</td><td><input type='button' value='View' class='btn btn - primary' onclick='ViewProduct("+d.product_id+")'</td></tr>")
+                })
+            }
+        })
+    }
+
+    function AddProduct() {
+        var p = $("#txtname").val();
+        var r = $("#txtrate").val();
+        var t = $("#txttax").val();
+        var st = { "product_name": p, "rate": r, "tax": t };
+        $.ajax({
+            url: '/Admin/Product/AddProduct',
+            method: 'post',
+            contentType: 'application/json',
+            data: JSON.stringify(st),
+            success: function (resp) {
+                console.log(resp);
+                alert(resp);
+                FetchProduct();
+            }
+        })
+
+    }
+
+    function ViewProduct(id) {
+        $.ajax({
+            url: '/Admin/Product/GetProductById/' + id,
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $("#txtid").val(resp.product_id);
+                $("#txtname").val(resp.product_name);
+                $("#txtrate").val(resp.rate);
+                $("#txttax").val(resp.tax);
+            }
+        })
+    }
+
+    function UpdateProduct() {
+        var id = $("#txtid").val();
+        var p = $("#txtname").val();
+        var r = $("#txtrate").val();
+        var t = $("#txttax").val();
+        var st = { "product_id": id, "product_name": p, "rate": r, "tax": t };
+        $.ajax({
+            url: '/Admin/Product/UpdateProduct',
+            method: 'post',
+            contentType: 'application/json',
+            data: JSON.stringify(st),
+            success: function (resp) {
+                console.log(resp);
+                alert(resp);
+                FetchProduct();
+            }
+            })
+    }
+</script>
+
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading" @*style="background-color: rgb(22, 7, 36);"*@>
+                <h2>Product Info</h2>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label>Product Id</label>
+                    <input type="text" id="txtid" class="form-control" disabled />
+                </div>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="txtname" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Rate</label>
+                    <input type="text" id="txtrate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Tax</label>
+                    <input type="text" id="txttax" class="form-control" />
+                </div>
+
+            </div>
+            <div class="panel-footer">
+                <input type="button" value="Submit" id="btnsubmit" class="btn btn-success" />
+                <input type="button" value="Update" id="btnupdate" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Product Name</th>
+                    <th>Rate</th>
+                    <th>Tax</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tbldata">
+            </tbody>
+        </table>
+    </div>
+</div>
+

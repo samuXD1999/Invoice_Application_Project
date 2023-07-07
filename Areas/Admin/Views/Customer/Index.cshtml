@@ -1,0 +1,153 @@
+﻿@model IEnumerable<Invoiceapplication.Models.tblCustomer>
+@{
+    ViewBag.Title = "Customer";
+    Layout = "~/Areas/Admin/Views/Shared/AdminLayout.cshtml";
+}
+
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/bootstrap")
+
+<script>
+
+    $(document).ready(function() {
+        FetchCustomer();
+        $("#btnsubmit").click(function(){
+            AddCustomer();
+        })
+        $("#btnupdate").click(function () {
+            UpdateCustomer();
+        })
+    })
+
+    function FetchCustomer() {
+        $.ajax({
+            url: '/Admin/Customer/GetCustomers',
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $("#tbldata").empty();
+                $.each(resp, function (i, d) {
+                    $("#tbldata").append("<tr><td>" + (i + 1) + "</td><td>" + d.customer_name + "</td><td>" + d.email_address + "</td><td>" + d.mobile_number + "</td><td>" + d.city + "</td><td><input type='button' value='View' class='btn btn - primary' onclick='ViewCustomer(" + d.customer_id +")'</td></tr>")
+                })
+            }
+        })
+    }
+
+    function AddCustomer() {
+        var c = $("#txtname").val();
+        var e = $("#txtemail").val();
+        var m = $("#txtmobile").val();
+        var city = $("#txtcity").val();
+        var p = $("#txtpassword").val();
+        var st = { "customer_name": c, "email_address": e, "mobile_number": m, "city": city, "password": p };
+        $.ajax({
+            url: '/Admin/Customer/AddCustomer',
+            method: 'post',
+            contentType: 'application/json',
+            data: JSON.stringify(st),
+            success: function (resp) {
+                console.log(resp);
+                alert(resp);
+                FetchCustomer();
+            }
+        })
+    }
+
+    function ViewCustomer(id) {
+        $.ajax({
+            url: '/admin/customer/GetCustomerById/' + id,
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $("#txtid").val(resp.customer_id);
+                $("#txtname").val(resp.customer_name);
+                $("#txtemail").val(resp.email_address);
+                $("#txtmobile").val(resp.mobile_number);
+                $("#txtcity").val(resp.city);
+                $("#txtpassword").val(resp.password);
+            }
+            })
+    }
+
+    function UpdateCustomer() {
+        var cid = $("#txtid").val();
+        var c = $("#txtname").val();
+        var e = $("#txtemail").val();
+        var m = $("#txtmobile").val();
+        var city = $("#txtcity").val();
+        var p = $("#txtpassword").val();
+        var st = { "customer_id":cid,"customer_name": c, "email_address": e, "mobile_number": m, "city": city, "password": p };
+        $.ajax({
+            url: '/Admin/Customer/UpdateCustomer',
+            method: 'post',
+            data: JSON.stringify(st),
+            contentType:'application/json',
+            success: function (resp) {
+                console.log(resp);
+                alert(resp);
+                FetchCustomer();
+            }
+        })
+    }
+
+</script>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2>Customer Info</h2>
+            </div>
+            <div class="panel-body">
+                <div class="form-group" hidden>
+                    <label>Customer Id</label>
+                    <input type="text" id="txtid" class="form-control" disabled />
+                </div>
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="txtname" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="text" id="txtemail" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" id="txtmobile" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="txtcity" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="txtpassword" class="form-control" />
+                </div>
+            </div>
+            <div class="panel-footer">
+                <input type="button" value="Submit" id="btnsubmit" class="btn btn-success" />
+                <input type="button" value="Update" id="btnupdate" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Customer Name</th>
+                    <th>Email Address</th>
+                    <th>Mobile Number</th>
+                    <th>City</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tbldata">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

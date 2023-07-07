@@ -1,0 +1,220 @@
+﻿
+@{
+    ViewBag.Title = "Invoice";
+    Layout = "~/Areas/Admin/Views/Shared/AdminLayout.cshtml";
+}
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/bootstrap")
+<script>
+    product = "";
+    var Productdata = [];
+    var final = 0;
+    $(document).ready(function () {
+        FetchCustomer();
+        FetchProduct();
+        $("#ddproduct").change(function () {
+            FetchProductById();
+        })
+        $("#txtqty").change(function () {
+            Calculate();
+        })
+        $("#btnadd").click(function () {
+            AddProduct();
+        })
+        $("#btnsubmit").click(function () {
+            AddInvoice();
+        })
+        
+    })
+
+
+    function FetchCustomer() {
+        $.ajax({
+            url:'/Admin/Customer/GetCustomers',
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $.each(resp, function (i, d) {
+                    $("#ddcustomer").append("<option value="+d.customer_id+">"+d.customer_name+"</option>")
+                })
+
+            }
+        })
+    }
+
+    function FetchProduct() {
+        $.ajax({
+            url: '/Admin/product/getproduct',
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $.each(resp, function (i, d) {
+                    $("#ddproduct").append("<option value="+d.product_id+">"+d.product_name+"</option>")
+                })
+            }
+        })
+    }
+
+    function FetchProductById() {
+        var id = $("#ddproduct").val();
+        $.ajax({
+            url: '/Admin/Product/GetProductById/' + id,
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $("#txtrate").val(resp.rate);
+                $("#txttax").val(resp.tax);
+                product = resp.product_name;
+            }
+        })
+    }
+
+    function Calculate()
+    {
+        var rate = Number($("#txtrate").val());
+        var tax = Number($("#txttax").val());
+        var qty = Number($("#txtqty").val());
+        var total = ((rate + ((rate * tax) / 100)) * qty);
+        $("#txttotal").val(total);
+
+    }
+    function AddProduct() {
+        /*var p = $("#ddproduct").val();*/
+        //var p = product.product_id;
+        //var pname = product.product_name;
+        var pid = $("#ddproduct").val();
+        var rate = Number($("#txtrate").val());
+        var tax = Number($("#txttax").val());
+        var qty = Number($("#txtqty").val());
+        var t = Number($("#txttotal").val());
+        var st = { "product_id": pid, "product_name": product, "rate": rate, "quantity": qty, "total": t };
+        console.log(st);  
+        Productdata.push(st);
+         
+        $("#ddproduct").val("");
+        $("#txtrate").val("");
+        $("#txtqty").val("");
+        $("#txttotal").val("");
+        $("#txttax").val("");
+        DisplayProduct();
+    }
+
+    function DisplayProduct() {
+        
+        $("#tbldata").empty();
+        final = 0;
+        $.each(Productdata, function (i, d) {
+            final += Number(d.total);
+            $("#tbldata").append("<tr><td>" + (i + 1) + "</td><td>" + d.product_name + "</td><td>" + d.rate + "</td><td>" + d.quantity + "</td><td>" + d.total + "</td></tr>")
+        })
+        $("#final").html(final);
+    }
+
+    function AddInvoice() {
+        var c = $("#ddcustomer").val();
+        var dt = $("#txtdate").val();
+
+        var st = { "customer_id": c, "invoice_date": dt, "invoice_amount": final, "tblInvoice_products": Productdata };
+        $.ajax({
+            url: '/Admin/Invoice/AddInvoice',
+            method: 'post',
+            data: JSON.stringify(st),
+            contentType: 'application/json',
+            success: function (resp) {
+                alert(resp);
+
+            }
+        })
+    }
+</script>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="panel panel-default">
+        <div class="panel-heading">
+        <h2>Invoice</h2>
+    </div>
+    <div class="panel-body">
+        <table class="table table-responsive" style="margin-top:25px">
+            <tr>
+                <td>
+                    <label class="form-group">Customer:</label>
+                    <select id="ddcustomer" class="form-control">
+                        <option selected disabled>Select Customer</option>
+                    </select>
+                </td>
+                <td>
+                    <label class="form-group">Invoice Date:</label>
+                    <input type="date" id="txtdate" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="form-group">Product Name</label>
+                    <select id="ddproduct" class="form-control">
+                        <option selected disabled>Select Product</option>
+                    </select>
+                </td>
+                <td>
+                    <label class="form-group">Rate</label>
+                    <input type="text" id="txtrate" style="width:150px" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="form-group">Tax</label>
+                    <input type="text" id="txttax" style="width:150px" class="form-control" />
+                </td>
+                <td>
+                    <label class="form-group"> Quantity</label>
+
+                    <input type="text" id="txtqty" style="width:150px" class="form-control" />
+                </td>
+
+            </tr>
+        </table>
+
+    </div>
+       
+            <div class="panel-footer">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label class="form-group">Total</label>
+                            <input type="text" id="txttotal" style="width:150px" class="form-control" />
+                        </td>
+                        <td>
+                            <input type="button" value="+" id="btnadd" class="btn btn-primary" style="margin-top:30px;margin-left:-200px" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Item Name</th>
+                    <th>Rate</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="tbldata"></tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align:right"><p style="font-size:15px;font-weight:bold">Total</p></td>
+                    <td><b id="final"></b></td>
+                </tr>
+            </tfoot>
+
+        </table>
+        <hr />
+        <input type="button" value="Submit" id="btnsubmit" class="btn btn-success"/>
+    </div>
+</div>

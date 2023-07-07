@@ -1,0 +1,87 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/AdminLayout.cshtml";
+}
+
+<script>
+
+    $(document).ready(function () {
+        FetchCustomer();
+        FetchCustomer2();
+        DisplayProduct()
+        $("#btnsubmit").click(function () {
+            FetchCustomer();
+            FetchCustomer2();
+        })
+        $("#btnupdate").click(function () {
+            UpdateCustomer();
+        })
+    })
+
+    function FetchCustomer() {
+        $.ajax({
+            url: '/Admin/Customer/GetCustomers',
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $("#tbldata").empty();
+                $.each(resp, function (i, d) {
+                    $("#tbldata").append("<tr><td>" + (i + 1) + "</td><td>" + d.customer_name + "</td><td>" + d.email_address + "</td><td>" + d.mobile_number + "</td><td>" + d.city + "</td><td>" + d.Total + "</td></tr>")
+                })
+            }
+        })
+    }
+
+    function FetchProduct() {
+        $.ajax({
+            url: '/Admin/product/getproduct',
+            method: 'get',
+            contentType: 'application/json',
+            success: function (resp) {
+                console.log(resp);
+                $.each(resp, function (i, d) {
+                    $("#tbldata").append("<tr><td>" + (i + 1) + "</td><td>" + d.Total + "</td><tr>")
+                })
+            }
+        })
+    }
+
+</script>
+<h2>Dashboard</h2>
+<table class="table table-bordered" style="border-block-color:aliceblue; border:5px solid black ;padding:50px;text-align:center">
+    <thead>
+        <tr>
+            <th>Sr No</th>
+            <th>Customer Name</th>
+            <th>Email Address</th>
+            <th>Mobile Number</th>
+            <th>City</th>
+            <th>Total</th>
+
+
+
+
+        </tr>
+    </thead>
+    <tbody id="tbldata">
+    </tbody>
+
+
+
+</table>
+<style>
+    th {
+        text-align: center;
+    }
+  
+   
+    thead {
+        background-color: black;
+        color:white;
+       
+    }
+</style>
+
+

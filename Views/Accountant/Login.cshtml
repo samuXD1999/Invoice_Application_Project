@@ -1,0 +1,44 @@
+﻿@model Invoiceapplication.Models.tblAccount_details
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+</head>
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/bootstrap")
+<body>
+    <div>
+        <div class="col-md-4"></div>
+        <div class="col-md-4" style="padding-top:100px">
+            @using (Html.BeginForm()) 
+            { 
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h2>Login here</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>User Name</label>
+                        @Html.TextBox("user_id", "", new { @class = "form-control", @placeholder = "Enter User Name or email address" })
+                    </div>
+                    <div class="form-group">
+                        <label>User Name</label>
+                        @Html.Password("password","", new { @class = "form-control", @placeholder ="Enter password" })
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <input type="submit" value="Login" class="btn btn-primary" /><br />
+                    <b>@ViewBag.msg</b>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</body>
+</html>
